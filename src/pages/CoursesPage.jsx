@@ -16,16 +16,20 @@
 //   refetches with GET /courses?search=<text> so the table only shows
 //   matching names.
 // ────────────────────────────────────────────────────────────────
+import { useEffect, useState } from 'react';
 import { BASE_URL } from '../api';
 
-// Use this sample data to build the static markup for S3.1.
-// In S4.1 you will replace it with data from the API.
-const SAMPLE_COURSES = [
-  { id: 1, name: 'Sample Course One', fee: 120, seatsTotal: 20, seatsAvailable: 18 },
-  { id: 2, name: 'Sample Course Two', fee: 200, seatsTotal: 10, seatsAvailable: 0 },
-];
-
 export default function CoursesPage() {
+  const [courses, setCourses] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch(`${BASE_URL}/courses`)
+      .then((response) => response.json())
+      .then(setCourses)
+      .finally(() => setLoading(false));
+  }, []);
+
   // TODO S3.1 — build the static page (search input + table)
   return (
     <section>
@@ -41,6 +45,9 @@ export default function CoursesPage() {
         className="mb-6 w-full rounded-md border border-slate-300 px-4 py-2 text-sm text-slate-800 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
       />
 
+      {loading ? (
+        <p className="text-sm text-slate-500">Loading…</p>
+      ) : (
       <div className="overflow-x-auto rounded-lg border border-slate-200">
         <table className="min-w-full divide-y divide-slate-200 text-left text-sm">
           <thead className="bg-slate-100 text-xs uppercase tracking-wide text-slate-600">
@@ -52,7 +59,7 @@ export default function CoursesPage() {
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-200 bg-white">
-            {SAMPLE_COURSES.map((course) => (
+            {courses.map((course) => (
               <tr key={course.id} className="even:bg-slate-50">
                 <td className="whitespace-nowrap px-4 py-3 text-slate-600">{course.id}</td>
                 <td className="px-4 py-3 font-medium text-slate-800">{course.name}</td>
@@ -75,14 +82,9 @@ export default function CoursesPage() {
           </tbody>
         </table>
       </div>
+      )}
     </section>
   );
-  // TODO S4.1 — load real courses from the API
+
   // TODO S4.2 — wire the search input to ?search=
-  return (
-    <section>
-      <h2 className="mb-4 text-lg font-semibold text-slate-800">Courses</h2>
-      <p className="text-sm text-slate-500">TODO: build the Courses page here.</p>
-    </section>
-  );
 }

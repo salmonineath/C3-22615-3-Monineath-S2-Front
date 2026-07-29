@@ -100,10 +100,4 @@ export default function EnrollPage() {
     </section>
   );
   // TODO S4.4 — wire the form to the API
-  return (
-    <section>
-      <h2 className="mb-4 text-lg font-semibold text-slate-800">Enroll a student</h2>
-      <p className="text-sm text-slate-500">TODO: build the Enroll form here.</p>
-    </section>
-  );
 }
