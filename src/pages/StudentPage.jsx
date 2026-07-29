@@ -16,6 +16,7 @@
 //   then reloads the student so the status badge updates and the button
 //   disappears.
 // ────────────────────────────────────────────────────────────────
+import { useState } from 'react';
 import { BASE_URL } from '../api';
 
 // Use this sample data to build the static markup for S3.3.
@@ -32,6 +33,34 @@ const SAMPLE_STUDENT = {
 };
 
 export default function StudentPage() {
+  const [studentId, setStudentId] = useState('');
+  const [student, setStudent] = useState(SAMPLE_STUDENT);
+  const [error, setError] = useState('');
+
+  async function loadStudent(id = studentId) {
+    setError('');
+
+    try {
+      const response = await fetch(`${BASE_URL}/students/${id}`);
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error);
+      }
+
+      setStudent(data);
+    } catch (loadError) {
+      setError(loadError.message || 'Unable to load student');
+    }
+  }
+
+  async function dropEnrollment(enrollmentId) {
+    await fetch(`${BASE_URL}/enrollments/${enrollmentId}/drop`, {
+      method: 'PUT',
+    });
+    await loadStudent(student.id);
+  }
+
   // TODO S3.3 — build the static page (input + card + enrollments table)
    return (
     <section>
@@ -47,27 +76,36 @@ export default function StudentPage() {
             type="number"
             min="1"
             placeholder="Enter student ID"
+            value={studentId}
+            onChange={(event) => setStudentId(event.target.value)}
             className="w-full rounded-md border border-slate-300 px-4 py-2 text-sm text-slate-800 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
           />
         </div>
         <button
           type="button"
+          onClick={() => loadStudent()}
           className="rounded-md bg-blue-600 px-5 py-2 text-sm font-semibold text-white transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
         >
           Load
         </button>
       </div>
 
+      {error ? (
+        <div className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          {error}
+        </div>
+      ) : (
+        <>
       <article className="mb-6 rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
-        <h3 className="text-lg font-semibold text-slate-800">{SAMPLE_STUDENT.name}</h3>
+        <h3 className="text-lg font-semibold text-slate-800">{student.name}</h3>
         <dl className="mt-4 grid gap-4 text-sm sm:grid-cols-2">
           <div>
             <dt className="font-medium text-slate-500">Email</dt>
-            <dd className="mt-1 text-slate-800">{SAMPLE_STUDENT.email}</dd>
+            <dd className="mt-1 text-slate-800">{student.email}</dd>
           </div>
           <div>
             <dt className="font-medium text-slate-500">Phone</dt>
-            <dd className="mt-1 text-slate-800">{SAMPLE_STUDENT.phone}</dd>
+            <dd className="mt-1 text-slate-800">{student.phone}</dd>
           </div>
         </dl>
       </article>
@@ -85,7 +123,7 @@ export default function StudentPage() {
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-200 bg-white">
-            {SAMPLE_STUDENT.enrollments.map((enrollment) => (
+            {student.enrollments.map((enrollment) => (
               <tr key={enrollment.id} className="even:bg-slate-50">
                 <td className="px-4 py-3 font-medium text-slate-800">
                   {enrollment.course.name}
@@ -111,6 +149,7 @@ export default function StudentPage() {
                   {enrollment.status === 'ACTIVE' && (
                     <button
                       type="button"
+                      onClick={() => dropEnrollment(enrollment.id)}
                       className="rounded-md bg-red-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
                     >
                       Drop
@@ -122,14 +161,8 @@ export default function StudentPage() {
           </tbody>
         </table>
       </div>
-    </section>
-  );
-  // TODO S4.3 — load the real student from the API on "Load"
-  // TODO S4.5 — make the "Drop" button work, then reload the student
-  return (
-    <section>
-      <h2 className="mb-4 text-lg font-semibold text-slate-800">Student lookup</h2>
-      <p className="text-sm text-slate-500">TODO: build the Student page here.</p>
+        </>
+      )}
     </section>
   );
 }

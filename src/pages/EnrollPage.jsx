@@ -17,22 +17,56 @@
 //   • failure (404 / 409) → show the API's error message in the red box
 //   • only one of the two boxes is visible at a time
 // ────────────────────────────────────────────────────────────────
+import { useEffect, useState } from 'react';
 import { BASE_URL } from '../api';
 
-// Use this sample data for the select options in S3.2.
-// In S4.4 you will replace it with data from the API.
-const SAMPLE_COURSES = [
-  { id: 1, name: 'Sample Course One', fee: 120, seatsAvailable: 18 },
-  { id: 2, name: 'Sample Course Two', fee: 200, seatsAvailable: 0 },
-];
-
 export default function EnrollPage() {
+  const [courses, setCourses] = useState([]);
+  const [studentId, setStudentId] = useState('');
+  const [courseId, setCourseId] = useState('');
+  const [success, setSuccess] = useState('');
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    fetch(`${BASE_URL}/courses`)
+      .then((response) => response.json())
+      .then(setCourses);
+  }, []);
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setSuccess('');
+    setError('');
+
+    const response = await fetch(`${BASE_URL}/enrollments`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        studentId: Number(studentId),
+        courseId: Number(courseId),
+      }),
+    });
+    const data = await response.json();
+
+    if (!response.ok) {
+      setError(data.error);
+      return;
+    }
+
+    setSuccess(data.message || 'Student enrolled successfully.');
+    setStudentId('');
+    setCourseId('');
+  };
+
   // TODO S3.2 — build the static form (inputs + button + boxes)
   return (
     <section>
       <h2 className="mb-4 text-lg font-semibold text-slate-800">Enroll a student</h2>
 
-      <form className="space-y-5 rounded-lg border border-slate-200 bg-white p-6">
+      <form
+        onSubmit={handleSubmit}
+        className="space-y-5 rounded-lg border border-slate-200 bg-white p-6"
+      >
         <div>
           <label
             htmlFor="student-id"
@@ -46,6 +80,8 @@ export default function EnrollPage() {
             type="number"
             min="1"
             required
+            value={studentId}
+            onChange={(event) => setStudentId(event.target.value)}
             placeholder="Enter student ID"
             className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-800 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
           />
@@ -62,13 +98,14 @@ export default function EnrollPage() {
             id="course-id"
             name="courseId"
             required
-            defaultValue=""
+            value={courseId}
+            onChange={(event) => setCourseId(event.target.value)}
             className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
           >
             <option value="" disabled>
               Select a course
             </option>
-            {SAMPLE_COURSES.map((course) => (
+            {courses.map((course) => (
               <option key={course.id} value={course.id}>
                 {course.name} — ${course.fee} ({course.seatsAvailable} seats left)
               </option>
@@ -84,20 +121,23 @@ export default function EnrollPage() {
         </button>
       </form>
 
-      <div
-        role="status"
-        className="mt-4 rounded-md border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700"
-      >
-        Student enrolled successfully.
-      </div>
+      {success && (
+        <div
+          role="status"
+          className="mt-4 rounded-md border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700"
+        >
+          {success}
+        </div>
+      )}
 
-      <div
-        role="alert"
-        className="mt-4 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
-      >
-        Unable to enroll the student.
-      </div>
+      {error && (
+        <div
+          role="alert"
+          className="mt-4 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+        >
+          {error}
+        </div>
+      )}
     </section>
   );
-  // TODO S4.4 — wire the form to the API
 }

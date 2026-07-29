@@ -22,13 +22,15 @@ import { BASE_URL } from '../api';
 export default function CoursesPage() {
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
 
   useEffect(() => {
-    fetch(`${BASE_URL}/courses`)
+    setLoading(true);
+    fetch(`${BASE_URL}/courses?search=${encodeURIComponent(search)}`)
       .then((response) => response.json())
       .then(setCourses)
       .finally(() => setLoading(false));
-  }, []);
+  }, [search]);
 
   // TODO S3.1 — build the static page (search input + table)
   return (
@@ -41,6 +43,8 @@ export default function CoursesPage() {
       <input
         id="course-search"
         type="search"
+        value={search}
+        onChange={(event) => setSearch(event.target.value)}
         placeholder="Search courses..."
         className="mb-6 w-full rounded-md border border-slate-300 px-4 py-2 text-sm text-slate-800 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
       />
@@ -85,6 +89,4 @@ export default function CoursesPage() {
       )}
     </section>
   );
-
-  // TODO S4.2 — wire the search input to ?search=
 }
