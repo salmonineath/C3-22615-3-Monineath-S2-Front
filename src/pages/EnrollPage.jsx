@@ -28,6 +28,77 @@ const SAMPLE_COURSES = [
 
 export default function EnrollPage() {
   // TODO S3.2 — build the static form (inputs + button + boxes)
+  return (
+    <section>
+      <h2 className="mb-4 text-lg font-semibold text-slate-800">Enroll a student</h2>
+
+      <form className="space-y-5 rounded-lg border border-slate-200 bg-white p-6">
+        <div>
+          <label
+            htmlFor="student-id"
+            className="mb-1.5 block text-sm font-medium text-slate-700"
+          >
+            Student ID
+          </label>
+          <input
+            id="student-id"
+            name="studentId"
+            type="number"
+            min="1"
+            required
+            placeholder="Enter student ID"
+            className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-800 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+          />
+        </div>
+
+        <div>
+          <label
+            htmlFor="course-id"
+            className="mb-1.5 block text-sm font-medium text-slate-700"
+          >
+            Course
+          </label>
+          <select
+            id="course-id"
+            name="courseId"
+            required
+            defaultValue=""
+            className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+          >
+            <option value="" disabled>
+              Select a course
+            </option>
+            {SAMPLE_COURSES.map((course) => (
+              <option key={course.id} value={course.id}>
+                {course.name} — ${course.fee} ({course.seatsAvailable} seats left)
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <button
+          type="submit"
+          className="rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+        >
+          Enroll student
+        </button>
+      </form>
+
+      <div
+        role="status"
+        className="mt-4 rounded-md border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700"
+      >
+        Student enrolled successfully.
+      </div>
+
+      <div
+        role="alert"
+        className="mt-4 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+      >
+        Unable to enroll the student.
+      </div>
+    </section>
+  );
   // TODO S4.4 — wire the form to the API
   return (
     <section>
